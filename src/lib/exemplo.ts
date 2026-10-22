@@ -14,7 +14,7 @@ export async function carregarExemplo() {
     { id: I('fl65'), nome: 'Força Livre 6.5', tipo: 'tempo', indice: 6.5, descricao: 'Índice 6,500 s' },
     { id: I('dt'), nome: 'Dianteira Turbo', tipo: 'caracteristica', indice: null, descricao: 'Tração dianteira com turbo' },
   ];
-  const camp = [{ id: I('camp'), nome: 'Copa Exemplo de Arrancada', ano, pontuacao: DEFAULT_PTS }];
+  const camp = [{ id: I('camp'), nome: 'Copa Exemplo de Arrancada', ano, pontuacao: DEFAULT_PTS, banner: null }];
   const nomes = [['Rafael Moura', 'Rafa'], ['Diego Santana', 'Dieguinho'], ['Bruna Albuquerque', 'Bru'], ['Tiago Ferraz', 'Ferrari'], ['Marcos Leal', 'Leal'], ['Fernanda Prado', 'Nanda']];
   const cidades = ['Campinas', 'Sorocaba', 'Curitiba', 'Jundiaí', 'Ribeirão Preto', 'Londrina'];
   const pil = nomes.map(([n, a], i) => ({ id: I('p' + i), nome: n, apelido: a, cidade: cidades[i], status: 'aprovado' }));
@@ -27,10 +27,10 @@ export async function carregarExemplo() {
   const car = carDef.map(([k, p, m, n, cf, tr, cb, al]) => ({ id: I(k), pilotoId: I('p' + p), modelo: m, numero: n, configs: cf, tracao: tr, combustivel: cb, alimentacao: al }));
   const carPil = (ci: number) => car[ci].pilotoId;
   const ev = [
-    { id: I('e1'), nome: '1ª Etapa', campeonatoId: I('camp'), data: `${ano}-03-15`, local: 'Pista exemplo', status: 'encerrado', categorias: [I('street8'), I('dt')], pontuacao: [], encerradoAntecipado: false, vencedores: {},
+    { id: I('e1'), nome: '1ª Etapa', campeonatoId: I('camp'), data: `${ano}-03-15`, local: 'Pista exemplo', status: 'encerrado', categorias: [I('street8'), I('dt')], pontuacao: [], encerradoAntecipado: false, vencedores: {}, banner: null, formato: 'ambos',
       copa: { r1: [{ a: I('c0'), b: I('c6') }, { a: I('c2'), b: I('c5') }, { a: I('c3'), b: I('c4') }, { a: I('c1'), b: BYE }], vencedores: {} } },
-    { id: I('e2'), nome: '2ª Etapa', campeonatoId: I('camp'), data: `${ano}-06-21`, local: 'Pista exemplo', status: 'encerrado', categorias: [I('street8'), I('dt')], pontuacao: [30, 24, 19, 15, 12, 10, 8, 6, 4, 2], encerradoAntecipado: true, vencedores: {}, copa: null },
-    { id: I('e3'), nome: 'Desafio de Inverno', campeonatoId: null, data: `${ano}-08-09`, local: 'Pista exemplo', status: 'andamento', categorias: [I('fl65')], pontuacao: [], encerradoAntecipado: false, vencedores: {}, copa: null },
+    { id: I('e2'), nome: '2ª Etapa', campeonatoId: I('camp'), data: `${ano}-06-21`, local: 'Pista exemplo', status: 'encerrado', categorias: [I('street8'), I('dt')], pontuacao: [30, 24, 19, 15, 12, 10, 8, 6, 4, 2], encerradoAntecipado: true, vencedores: {}, copa: null, banner: null, formato: 'ranking' },
+    { id: I('e3'), nome: 'Desafio de Inverno', campeonatoId: null, data: `${ano}-08-09`, local: 'Pista exemplo', status: 'andamento', categorias: [I('fl65')], pontuacao: [], encerradoAntecipado: false, vencedores: {}, copa: null, banner: null, formato: 'ranking' },
   ];
 
   const pux: Record<string, unknown>[] = [];

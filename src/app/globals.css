@@ -225,3 +225,12 @@ main.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max
   nav.tabs a{font-size:15px;padding:6px 10px}
   .brand{font-size:19px}
 }
+
+/* banners */
+.evcard.combanner{padding-top:0}
+.evcard .evbanner{display:block;margin:0 -18px;width:calc(100% + 36px);max-width:none;aspect-ratio:4/5;object-fit:cover;object-position:top;border-bottom:1px solid var(--line)}
+.evhero{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr) auto;align-items:end}
+.evhero .poster{display:block;border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.evhero .poster img{display:block;width:100%;height:auto}
+.campbanner{display:block;width:100%;max-height:420px;object-fit:contain;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+@media (max-width:760px){.evhero{grid-template-columns:1fr}.evhero .poster{max-width:420px}}

@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '../App';
 import { Ava, Confirma, Empty, ExTag, Slip, StatusPill } from '../ui';
 import { FormEvento, FormMontarCopa, FormPuxada, FormPuxadaCopa } from '../forms';
-import { byName, fdate, ft } from '@/lib/format';
+import { byName, fdate, fotoUrl, ft } from '@/lib/format';
 import {
-  BYE, carName, carPil, copaBracket, copaRuns, pilName, resultado, roundLabel, runs, tot, validade, type Confronto,
+  BYE, carName, carPil, copaBracket, FORMATO, temCopa, temRanking, copaRuns, pilName, resultado, roundLabel, runs, tot, validade, type Confronto,
 } from '@/lib/regras';
 import { atualizar as atualizarDb, excluir } from '@/lib/db';
 import type { Evento } from '@/lib/types';
@@ -22,13 +22,16 @@ export function EventoView({ id }: { id: string }) {
   const [sel, setSel] = useState<string | null>(null);
   if (!ev) return <><Empty title="Evento não encontrado" sub="Ele pode ter sido removido." /><p><Link className="btn" href="/">Voltar aos eventos</Link></p></>;
   const camp = ev.campeonatoId ? d.camp[ev.campeonatoId] : undefined;
-  const cats = ev.categorias.map((c) => d.cat[c]).filter(Boolean).sort(byName);
-  const showCopa = !!ev.copa?.r1?.length || s.isAdmin;
+  const cats = temRanking(ev) ? ev.categorias.map((c) => d.cat[c]).filter(Boolean).sort(byName) : [];
+  const showCopa = temCopa(ev);
   const cat = sel === COPA && showCopa ? COPA : cats.find((c) => c.id === sel)?.id || cats[0]?.id || (showCopa ? COPA : null);
+  const banner = ev.banner || camp?.banner;
+  const abas = cats.length + (showCopa ? 1 : 0);
 
   return (
     <>
-      <div className="pagehead">
+      <div className={'pagehead' + (banner ? ' evhero' : '')}>
+        {banner && <a className="poster" href={fotoUrl(banner)!} target="_blank" rel="noreferrer"><img src={fotoUrl(banner)!} alt={`Cartaz: ${ev.nome}`} /></a>}
         <div className="stack" style={{ gap: 8 }}>
           <span className="eyebrow">{camp ? `${camp.nome} · ${camp.ano || ''}` : 'Evento avulso — não pontua no ranking anual'}</span>
           <h1>{ev.nome}<ExTag o={ev} /></h1>
@@ -36,6 +39,7 @@ export function EventoView({ id }: { id: string }) {
             <StatusPill s={ev.status} />
             <span className="muted">{fdate(ev.data)}{ev.local ? ' · ' + ev.local : ''}</span>
             {ev.encerradoAntecipado && <span className="pill bad">Encerrado antes do fim (vale classificatória)</span>}
+            <span className="pill">{FORMATO[ev.formato] || FORMATO.ranking}</span>
           </div>
         </div>
         {s.isAdmin && (
@@ -46,16 +50,16 @@ export function EventoView({ id }: { id: string }) {
           </div>
         )}
       </div>
-      {!cats.length && !showCopa ? (
+      {!abas ? (
         <div className="section"><Empty title="Sem categorias neste evento" sub="Edite o evento e escolha as categorias que vão correr." /></div>
       ) : (
         <>
-          <div className="section">
+          {abas > 1 && <div className="section">
             <div className="seg" role="group" aria-label="Categoria">
               {cats.map((c) => <button key={c.id} aria-pressed={c.id === cat} onClick={() => setSel(c.id)}>{c.nome}</button>)}
               {showCopa && <button aria-pressed={cat === COPA} onClick={() => setSel(COPA)}>★ Copa</button>}
             </div>
-          </div>
+          </div>}
           {cat === COPA ? <CopaView ev={ev} /> : cat && <CategoriaView ev={ev} catId={cat} />}
         </>
       )}

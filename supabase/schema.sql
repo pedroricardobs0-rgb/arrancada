@@ -41,6 +41,7 @@ create table if not exists public.campeonatos (
   nome text not null,
   ano int,
   pontuacao int[] not null default '{25,20,16,13,11,10,9,8,7,6,5,4,3,2,1}',
+  banner text,
   exemplo boolean not null default false
 );
 
@@ -97,6 +98,8 @@ create table if not exists public.eventos (
   encerrado_antecipado boolean not null default false,
   vencedores jsonb not null default '{}',
   copa jsonb,
+  banner text,
+  formato text not null default 'ranking' check (formato in ('ranking', 'copa', 'ambos')),
   exemplo boolean not null default false
 );
 

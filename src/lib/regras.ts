@@ -12,6 +12,9 @@ export const COMBUSTIVEL: Record<string, string> = { alcool: 'Álcool', gasolina
 export const ALIMENTACAO: Record<string, string> = { injetado: 'Injetado', carburado: 'Carburado' };
 export const STATUS: Record<string, string> = { agendado: 'Agendado', andamento: 'Em andamento', encerrado: 'Encerrado' };
 export const BYE = 'BYE';
+export const FORMATO: Record<string, string> = { ranking: 'Ranking (categorias e pontos)', copa: 'Copa (mata-mata sem categoria)', ambos: 'Ranking + Copa' };
+export const temRanking = (ev: Evento) => ev.formato !== 'copa';
+export const temCopa = (ev: Evento) => ev.formato !== 'ranking';
 
 export const vals = <T,>(o: Record<string, T>) => Object.values(o);
 export const tot = (p: Pick<Puxada, 'reacao' | 'm201'>) => (p.reacao ?? 0) + (p.m201 ?? 0);
@@ -117,7 +120,7 @@ export function resultado(d: Dados, evId: string, catId: string) {
 }
 
 export function rankingCamp(d: Dados, campId: string, catId: string) {
-  const evs = vals(d.ev).filter((e) => e.campeonatoId === campId && (e.categorias || []).includes(catId)).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+  const evs = vals(d.ev).filter((e) => e.campeonatoId === campId && temRanking(e) && (e.categorias || []).includes(catId)).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
   const rows: Record<string, { pid: string; total: number; et: Record<string, number>; vit: number; best: number | null }> = {};
   for (const ev of evs) {
     if (ev.status !== 'encerrado') continue;

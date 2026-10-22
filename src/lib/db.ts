@@ -53,8 +53,8 @@ async function reduzir(file: File, max = 1400): Promise<Blob> {
   } catch { return file; }
 }
 
-export async function enviarFoto(file: File, userId: string) {
-  const blob = await reduzir(file);
+export async function enviarFoto(file: File, userId: string, max = 1400) {
+  const blob = await reduzir(file, max);
   const path = `${userId}/${crypto.randomUUID()}.jpg`;
   const { error } = await createClient().storage.from('fotos').upload(path, blob, { contentType: 'image/jpeg' });
   if (error) throw new Error('Falha ao enviar a foto: ' + error.message);

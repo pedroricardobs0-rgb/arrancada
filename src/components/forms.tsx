@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useApp } from './App';
 import { FotoCampo, MForm, Modal } from './ui';
 import { byDateDesc, byName, ft, num } from '@/lib/format';
-import { ALIMENTACAO, aprovados, BYE, COMBUSTIVEL, carLabel, carName, carPil, copaBracket, copaRuns, DEFAULT_PTS, FASES, roundLabel, STATUS, TRACAO, tot, validade, vals } from '@/lib/regras';
+import { ALIMENTACAO, aprovados, BYE, COMBUSTIVEL, FORMATO, carLabel, carName, carPil, copaBracket, copaRuns, DEFAULT_PTS, FASES, roundLabel, STATUS, TRACAO, tot, validade, vals } from '@/lib/regras';
 import { enviarFoto, salvar } from '@/lib/db';
-import type { Alimentacao, Campeonato, Carro, Categoria, Combustivel, Evento, Fase, Piloto, Puxada, Tracao } from '@/lib/types';
+import type { Alimentacao, Campeonato, Carro, Categoria, Combustivel, Evento, Fase, Formato, Piloto, Puxada, Tracao } from '@/lib/types';
 
 const novoId = () => crypto.randomUUID();
 const listaPts = (s: string) => s.split(/[,;\s]+/).filter(Boolean).map(Number).filter((n) => isFinite(n));
@@ -40,12 +40,15 @@ export function FormCampeonato({ c }: { c?: Campeonato }) {
   const [nome, setNome] = useState(c?.nome || '');
   const [ano, setAno] = useState(String(c?.ano || new Date().getFullYear()));
   const [pts, setPts] = useState((c?.pontuacao || DEFAULT_PTS).join(', '));
+  const [banner, setBanner] = useState<File | null>(null);
+  const { s } = useApp();
   return (
     <Modal title={c ? 'Editar campeonato' : 'Novo campeonato'}>
       <MForm onSubmit={async () => {
         if (!nome.trim()) throw new Error('Informe o nome do campeonato.');
         const p = listaPts(pts);
-        await salvar('camp', { id: c?.id || novoId(), nome: nome.trim(), ano: +ano || null, pontuacao: p.length ? p : DEFAULT_PTS });
+        const b = banner ? await enviarFoto(banner, s.userId!, 1800) : c?.banner ?? null;
+        await salvar('camp', { id: c?.id || novoId(), nome: nome.trim(), ano: +ano || null, pontuacao: p.length ? p : DEFAULT_PTS, banner: b });
       }}>
         <div className="fgrid">
           <label className="f" style={{ gridColumn: 'span 2' }}>Nome<input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Campeonato Paulista de Arrancada" autoFocus /></label>
@@ -53,14 +56,18 @@ export function FormCampeonato({ c }: { c?: Campeonato }) {
         </div>
         <label className="f">Pontuação padrão por posição<input value={pts} onChange={(e) => setPts(e.target.value)} /></label>
         <span className="muted" style={{ fontSize: 13 }}>1º, 2º, 3º… separados por vírgula. Cada etapa pode ter uma pontuação diferente no cadastro do evento.</span>
+        <FotoCampo label="Banner do campeonato (opcional)" atual={c?.banner} onFile={setBanner} />
+        <span className="muted" style={{ fontSize: 13 }}>Usado nas etapas que não têm banner próprio.</span>
       </MForm>
     </Modal>
   );
 }
 
 export function FormEvento({ e }: { e?: Evento }) {
-  const { d, fechar, toast } = useApp();
+  const { d, s, fechar, toast } = useApp();
   const router = useRouter();
+  const [banner, setBanner] = useState<File | null>(null);
+  const [formato, setFormato] = useState<Formato>(e?.formato || 'ranking');
   const [f, setF] = useState({
     nome: e?.nome || '', campeonatoId: e?.campeonatoId || '', data: e?.data || '', local: e?.local || '', status: e?.status || 'agendado',
     categorias: e?.categorias || [], pts: (e?.pontuacao || []).join(', '), ant: !!e?.encerradoAntecipado,
@@ -72,10 +79,13 @@ export function FormEvento({ e }: { e?: Evento }) {
     <Modal title={e ? 'Editar evento' : 'Novo evento'}>
       <MForm onSubmit={async () => {
         if (!f.nome.trim()) throw new Error('Informe o nome do evento.');
+        if (formato !== 'copa' && !f.categorias.length) throw new Error('Escolha as categorias que vão correr.');
         const id = e?.id || novoId();
+        const b = banner ? await enviarFoto(banner, s.userId!, 1800) : e?.banner ?? null;
         await salvar('ev', {
+          banner: b, formato,
           id, nome: f.nome.trim(), campeonatoId: f.campeonatoId || null, data: f.data || null, local: f.local.trim() || null, status: f.status,
-          categorias: f.categorias, pontuacao: listaPts(f.pts), encerradoAntecipado: f.ant, vencedores: e?.vencedores || {}, copa: e?.copa ?? null,
+          categorias: formato === 'copa' ? [] : f.categorias, pontuacao: listaPts(f.pts), encerradoAntecipado: f.ant, vencedores: e?.vencedores || {}, copa: e?.copa ?? null,
         });
         if (!e) { fechar(); toast('Evento criado.'); router.push('/eventos/' + id); return 'keep'; }
       }}>
@@ -91,14 +101,19 @@ export function FormEvento({ e }: { e?: Evento }) {
           <label className="f">Status<select value={f.status} onChange={(x) => set('status', x.target.value)}>
             {Object.entries(STATUS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
         </div>
-        <fieldset><legend>Categorias que correm</legend><div className="checks">
+        <fieldset><legend>Formato</legend><div className="checks">
+          {Object.entries(FORMATO).map(([k, l]) => <label key={k}><input type="radio" name="formato" checked={formato === k} onChange={() => setFormato(k as Formato)} />{l}</label>)}
+        </div></fieldset>
+        {formato === 'copa' && <div className="note" style={{ fontSize: 13 }}>Na Copa todos os carros escolhidos disputam um mata-mata até o 1º, 2º e 3º, sem categoria e sem pontos no ranking. Depois de salvar, monte a chave na aba ★ Copa do evento.</div>}
+        {formato !== 'copa' && <><fieldset><legend>Categorias que correm</legend><div className="checks">
           {cats.length ? cats.map((c) => (
             <label key={c.id}><input type="checkbox" checked={f.categorias.includes(c.id)}
               onChange={(x) => set('categorias', x.target.checked ? [...f.categorias, c.id] : f.categorias.filter((y) => y !== c.id))} />{c.nome}</label>
           )) : <span className="muted">Cadastre categorias na área Admin.</span>}
         </div></fieldset>
         <label className="f">Pontuação desta etapa (opcional)<input value={f.pts} onChange={(x) => set('pts', x.target.value)} placeholder="Vazio = usa a pontuação do campeonato" /></label>
-        <div className="checks"><label><input type="checkbox" checked={f.ant} onChange={(x) => set('ant', x.target.checked)} />Encerrado antes do fim (chuva etc.) — vale a classificatória</label></div>
+        <div className="checks"><label><input type="checkbox" checked={f.ant} onChange={(x) => set('ant', x.target.checked)} />Encerrado antes do fim (chuva etc.) — vale a classificatória</label></div></>}
+        <FotoCampo label="Banner / cartaz do evento (opcional)" atual={e?.banner} onFile={setBanner} />
       </MForm>
     </Modal>
   );

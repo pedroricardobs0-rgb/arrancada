@@ -6,7 +6,7 @@ import { useApp } from '../App';
 import { Ava, Confirma, Empty, ExTag, Slip, StatusPill } from '../ui';
 import { FormCampeonato, FormCarro, FormEvento, FormPilotoAdmin, FormPuxada } from '../forms';
 import { byDateAsc, byDateDesc, byName, fdate, fotoUrl, ft, initials } from '@/lib/format';
-import { aprovados, melhorAno, pilName, rankingCamp, resultado, copaBracket, carPil, STATUS, TRACAO, COMBUSTIVEL, ALIMENTACAO, validade, vals, yearOf } from '@/lib/regras';
+import { aprovados, melhorAno, pilName, rankingCamp, resultado, copaBracket, temCopa, temRanking, carPil, STATUS, TRACAO, COMBUSTIVEL, ALIMENTACAO, validade, vals, yearOf } from '@/lib/regras';
 import { apagarFoto, excluir } from '@/lib/db';
 import type { Carro, Evento } from '@/lib/types';
 
@@ -39,16 +39,17 @@ export function HomeView() {
 function EvCard({ ev }: { ev: Evento }) {
   const { d } = useApp();
   const camp = ev.campeonatoId ? d.camp[ev.campeonatoId] : undefined;
-  const cats = ev.categorias.map((c) => d.cat[c]).filter(Boolean);
-  const copa = copaBracket(d, ev);
+  const cats = temRanking(ev) ? ev.categorias.map((c) => d.cat[c]).filter(Boolean) : [];
+  const copa = temCopa(ev) ? copaBracket(d, ev) : null;
+  const banner = ev.banner || camp?.banner;
   return (
-    <Link className="evcard" href={'/eventos/' + ev.id}>
-      <span className="lane" aria-hidden="true" />
+    <Link className={'evcard' + (banner ? ' combanner' : '')} href={'/eventos/' + ev.id}>
+      {banner ? <img className="evbanner" src={fotoUrl(banner)!} alt="" /> : <span className="lane" aria-hidden="true" />}
       <div className="row between"><span className="eyebrow">{camp ? camp.nome : 'Evento avulso'}</span><StatusPill s={ev.status} /></div>
       <span className="ttl">{ev.nome}</span>
       <span className="meta">
         <span>{fdate(ev.data)}{ev.local ? ' · ' + ev.local : ''}</span>
-        <span>{cats.length} categoria{cats.length === 1 ? '' : 's'}{ev.encerradoAntecipado ? ' · encerrado antes do fim' : ''}{ev.exemplo ? ' · exemplo' : ''}</span>
+        <span>{ev.formato === 'copa' ? 'Copa · mata-mata sem categoria' : `${cats.length} categoria${cats.length === 1 ? '' : 's'}${ev.formato === 'ambos' ? ' + Copa' : ''}`}{ev.encerradoAntecipado ? ' · encerrado antes do fim' : ''}{ev.exemplo ? ' · exemplo' : ''}</span>
       </span>
       {(cats.length > 0 || copa) && (
         <span className="lead">
@@ -74,7 +75,7 @@ export function RankingView() {
       {s.isAdmin && <button className="btn primary" onClick={() => abrir(<FormCampeonato />)}>Novo campeonato</button>}</Empty></div></>
   );
   const camp = (campSel && d.camp[campSel]) || camps[0];
-  const catIds = [...new Set(vals(d.ev).filter((e) => e.campeonatoId === camp.id).flatMap((e) => e.categorias))].filter((c) => d.cat[c]);
+  const catIds = [...new Set(vals(d.ev).filter((e) => e.campeonatoId === camp.id && temRanking(e)).flatMap((e) => e.categorias))].filter((c) => d.cat[c]);
   const cats = catIds.map((c) => d.cat[c]).sort(byName);
   const cat = catSel && catIds.includes(catSel) ? catSel : cats[0]?.id;
   const rk = cat ? rankingCamp(d, camp.id, cat) : null;
@@ -86,6 +87,7 @@ export function RankingView() {
           <select value={camp.id} onChange={(e) => { setCamp(e.target.value); setCat(null); }}>
             {camps.map((c) => <option key={c.id} value={c.id}>{c.nome} {c.ano ? `(${c.ano})` : ''}</option>)}</select></label>
       </div>
+      {camp.banner && <div className="section"><img className="campbanner" src={fotoUrl(camp.banner)!} alt={`Banner: ${camp.nome}`} /></div>}
       <div className="section">
         {!rk ? <Empty title="Sem etapas com categorias" sub="Cadastre eventos neste campeonato para montar o ranking." /> : (
           <>

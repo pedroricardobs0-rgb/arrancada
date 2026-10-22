@@ -6,7 +6,8 @@ export type StatusPiloto = 'pendente' | 'aprovado' | 'recusado';
 export type Fase = 'classificatoria' | 'semi1' | 'semi2' | 'final' | 'terceiro' | 'copa';
 
 export type Categoria = { id: string; nome: string; tipo: 'tempo' | 'caracteristica'; indice: number | null; descricao: string | null; exemplo?: boolean };
-export type Campeonato = { id: string; nome: string; ano: number | null; pontuacao: number[]; exemplo?: boolean };
+export type Campeonato = { id: string; nome: string; ano: number | null; pontuacao: number[]; banner: string | null; exemplo?: boolean };
+export type Formato = 'ranking' | 'copa' | 'ambos';
 export type Piloto = {
   id: string; userId: string | null; nome: string; apelido: string | null; equipe: string | null; cidade: string | null;
   foto: string | null; status: StatusPiloto; motivoRecusa: string | null; exemplo?: boolean;
@@ -21,7 +22,7 @@ export type Copa = { r1: CopaMatchDef[]; vencedores: Record<string, string | nul
 export type Evento = {
   id: string; nome: string; campeonatoId: string | null; data: string | null; local: string | null; status: StatusEvento;
   categorias: string[]; pontuacao: number[]; encerradoAntecipado: boolean;
-  vencedores: Record<string, Record<string, string | null>>; copa: Copa | null; exemplo?: boolean;
+  vencedores: Record<string, Record<string, string | null>>; copa: Copa | null; banner: string | null; formato: Formato; exemplo?: boolean;
 };
 export type Puxada = {
   id: string; eventoId: string; categoriaId: string | null; fase: Fase; copaKey: string | null; pilotoId: string; carroId: string;
