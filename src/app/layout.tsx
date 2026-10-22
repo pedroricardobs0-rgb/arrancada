@@ -12,7 +12,26 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: '#131211', viewportFit: 'cover', width: 'device-width', initialScale: 1 };
 
+function ConfigIncompleta({ faltando }: { faltando: string[] }) {
+  return (
+    <html lang="pt-BR">
+      <body>
+        <main className="wrap" style={{ paddingBlock: 48 }}>
+          <div className="empty"><b>Configuração incompleta</b>
+            <span>Faltam as variáveis de ambiente {faltando.join(' e ')} na Vercel. Adicione-as em Settings → Environment Variables e publique de novo (Redeploy).</span>
+          </div>
+        </main>
+      </body>
+    </html>
+  );
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const faltando = [
+    !process.env.NEXT_PUBLIC_SUPABASE_URL && 'NEXT_PUBLIC_SUPABASE_URL',
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY && 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  ].filter((x): x is string => !!x);
+  if (faltando.length) return <ConfigIncompleta faltando={faltando} />;
   const { dados, sessao } = await carregar();
   return (
     <html lang="pt-BR">
