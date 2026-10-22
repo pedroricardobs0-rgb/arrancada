@@ -2,10 +2,10 @@ import type { Dados, Evento, Puxada } from './types';
 
 export const DEFAULT_PTS = [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 export const FASES: Record<string, string> = {
-  classificatoria: 'Classificatória', semi1: 'Semifinal 1 (1º × 4º)', semi2: 'Semifinal 2 (2º × 3º)', final: 'Final', terceiro: 'Disputa de 3º',
+  treino: 'Treino (não conta na classificação)', classificatoria: 'Classificatória', semi1: 'Semifinal 1 (1º × 4º)', semi2: 'Semifinal 2 (2º × 3º)', final: 'Final', terceiro: 'Disputa de 3º',
 };
 export const FASE_CURTA: Record<string, string> = {
-  classificatoria: 'Classif.', semi1: 'Semi 1', semi2: 'Semi 2', final: 'Final', terceiro: '3º lugar', copa: 'Copa',
+  treino: 'Treino', classificatoria: 'Classif.', semi1: 'Semi 1', semi2: 'Semi 2', final: 'Final', terceiro: '3º lugar', copa: 'Copa',
 };
 export const TRACAO: Record<string, string> = { dianteira: 'Dianteira', traseira: 'Traseira', '4x4': '4x4' };
 export const COMBUSTIVEL: Record<string, string> = { alcool: 'Álcool', gasolina: 'Gasolina', metanol: 'Metanol' };

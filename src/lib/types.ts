@@ -3,9 +3,9 @@ export type Combustivel = 'alcool' | 'gasolina' | 'metanol';
 export type Alimentacao = 'injetado' | 'carburado';
 export type StatusEvento = 'agendado' | 'andamento' | 'encerrado';
 export type StatusPiloto = 'pendente' | 'aprovado' | 'recusado';
-export type Fase = 'classificatoria' | 'semi1' | 'semi2' | 'final' | 'terceiro' | 'copa';
+export type Fase = 'treino' | 'classificatoria' | 'semi1' | 'semi2' | 'final' | 'terceiro' | 'copa';
 
-export type Categoria = { id: string; nome: string; tipo: 'tempo' | 'caracteristica'; indice: number | null; descricao: string | null; exemplo?: boolean };
+export type Categoria = { id: string; nome: string; tipo: 'tempo' | 'caracteristica'; indice: number | null; descricao: string | null; letra: string | null; exemplo?: boolean };
 export type Campeonato = { id: string; nome: string; ano: number | null; pontuacao: number[]; banner: string | null; exemplo?: boolean };
 export type Formato = 'ranking' | 'copa' | 'ambos';
 export type Piloto = {
@@ -27,7 +27,7 @@ export type Evento = {
 export type Puxada = {
   id: string; eventoId: string; categoriaId: string | null; fase: Fase; copaKey: string | null; pilotoId: string; carroId: string;
   reacao: number | null; p60: number | null; m100: number | null; m201: number | null; vel: number | null;
-  valida: boolean; motivo: string | null; criado: number; exemplo?: boolean;
+  valida: boolean; motivo: string | null; criado: number; importKey: string | null; exemplo?: boolean;
 };
 
 export type Dados = {

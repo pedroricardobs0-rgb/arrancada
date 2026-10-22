@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '../App';
 import { Ava, Confirma, Empty, ExTag, Slip, StatusPill } from '../ui';
 import { FormEvento, FormMontarCopa, FormPuxada, FormPuxadaCopa } from '../forms';
+import { FormImportarPdf } from '../ImportarPdf';
 import { byName, fdate, fotoUrl, ft } from '@/lib/format';
 import {
-  BYE, carName, carPil, copaBracket, FORMATO, temCopa, temRanking, copaRuns, pilName, resultado, roundLabel, runs, tot, validade, type Confronto,
+  BYE, carName, carPil, copaBracket, FORMATO, temCopa, temRanking, vals, copaRuns, pilName, resultado, roundLabel, runs, tot, validade, type Confronto,
 } from '@/lib/regras';
 import { atualizar as atualizarDb, excluir } from '@/lib/db';
 import type { Evento } from '@/lib/types';
@@ -45,6 +46,7 @@ export function EventoView({ id }: { id: string }) {
         {s.isAdmin && (
           <div className="row">
             {cat && cat !== COPA && <button className="btn primary" onClick={() => abrir(<FormPuxada eventoId={ev.id} categoriaId={cat} />)}>Lançar puxada</button>}
+            <button className="btn ghost" onClick={() => abrir(<FormImportarPdf ev={ev} />)}>Importar tempos (PDF)</button>
             <button className="btn ghost" onClick={() => abrir(<FormEvento e={ev} />)}>Editar evento</button>
             <Confirma onConfirm={async () => { await excluir('ev', ev.id); router.push('/'); router.refresh(); }}>Excluir evento</Confirma>
           </div>
@@ -200,6 +202,43 @@ function MatchBox({ m, title, por, override, lancar }: {
 }
 
 function CopaView({ ev }: { ev: Evento }) {
+  return <><CopaChave ev={ev} />{ev.formato === 'copa' && <TreinosCopa ev={ev} />}</>;
+}
+
+/** Tempos de treino/classificação importados num evento só de Copa: melhor tempo de cada carro. */
+function TreinosCopa({ ev }: { ev: Evento }) {
+  const { d, abrir, atualizar } = useApp();
+  const list = vals(d.pux).filter((p) => p.eventoId === ev.id && p.fase !== 'copa');
+  if (!list.length) return null;
+  const porCarro: Record<string, { car: string; n: number; best: (typeof list)[number] | null }> = {};
+  for (const p of list) {
+    const x = (porCarro[p.carroId] ||= { car: p.carroId, n: 0, best: null });
+    x.n++;
+    if (validade(d, p).ok && (!x.best || tot(p) < tot(x.best))) x.best = p;
+  }
+  const rows = Object.values(porCarro).sort((a, b) => (a.best ? tot(a.best) : 99) - (b.best ? tot(b.best) : 99));
+  const recentes = [...list].sort((a, b) => (b.criado || 0) - (a.criado || 0));
+  return (
+    <>
+      <div className="section"><h2>Treinos</h2>
+        <div className="tbl"><table>
+          <thead><tr><th>Piloto / carro</th><th>Cat.</th><th className="n">Reação</th><th className="n">60 pés</th><th className="n">201 m</th><th className="n">Vel. final</th><th className="n">R + 201</th><th className="n">Puxadas</th></tr></thead>
+          <tbody>{rows.map((x) => { const b = x.best; const pid = carPil(d, x.car); return (
+            <tr key={x.car} className={b ? '' : 'dq'}>
+              <td><div className="who"><Ava pid={pid} /><div><b>{pilName(d, pid)}</b><small>{carName(d, x.car)}</small></div></div></td>
+              <td>{b?.categoriaId ? d.cat[b.categoriaId]?.nome : '—'}</td>
+              <td className="n">{ft(b?.reacao)}</td><td className="n">{ft(b?.p60)}</td><td className="n">{ft(b?.m201)}</td>
+              <td className="n">{b ? ft(b.vel, 2) + ' km/h' : '—'}</td><td className="n"><b>{b ? ft(tot(b)) : '—'}</b></td><td className="n">{x.n}</td>
+            </tr>); })}</tbody></table></div>
+      </div>
+      <div className="section"><h2>Todas as puxadas de treino</h2>
+        <div className="slips">{recentes.map((p) => <Slip key={p.id} p={p} onEdit={() => abrir(<FormPuxada p={p} />)} onDelete={async () => { await excluir('pux', p.id); atualizar(); }} />)}</div>
+      </div>
+    </>
+  );
+}
+
+function CopaChave({ ev }: { ev: Evento }) {
   const { d, s, abrir, atualizar, toast } = useApp();
   const b = copaBracket(d, ev);
   if (!b) return (

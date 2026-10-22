@@ -16,18 +16,20 @@ export function FormCategoria({ c }: { c?: Categoria }) {
   const [tipo, setTipo] = useState<Categoria['tipo']>(c?.tipo || 'tempo');
   const [ind, setInd] = useState(c?.indice != null ? ft(c.indice) : '');
   const [desc, setDesc] = useState(c?.descricao || '');
+  const [letra, setLetra] = useState(c?.letra || '');
   return (
     <Modal title={c ? 'Editar categoria' : 'Nova categoria'}>
       <MForm onSubmit={async () => {
         const indice = num(ind);
         if (!nome.trim()) throw new Error('Informe o nome da categoria.');
         if (tipo === 'tempo' && indice == null) throw new Error('Categoria de tempo precisa do índice de 201 m.');
-        await salvar('cat', { id: c?.id || novoId(), nome: nome.trim(), tipo, indice: tipo === 'tempo' ? indice : null, descricao: desc.trim() || null });
+        await salvar('cat', { id: c?.id || novoId(), nome: nome.trim(), tipo, indice: tipo === 'tempo' ? indice : null, descricao: desc.trim() || null, letra: letra.trim().toUpperCase() || null });
       }}>
         <label className="f">Nome<input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Street 8.0, Dianteira Turbo" autoFocus /></label>
         <div className="fgrid">
           <label className="f">Tipo<select value={tipo} onChange={(e) => setTipo(e.target.value as Categoria['tipo'])}>
             <option value="tempo">Categoria de tempo</option><option value="caracteristica">Por característica</option></select></label>
+          <label className="f">Letra no cronômetro<input value={letra} maxLength={2} onChange={(e) => setLetra(e.target.value.toUpperCase())} placeholder="Ex.: J" /></label>
           {tipo === 'tempo' && <label className="f">Índice 201 m (s)<input inputMode="decimal" value={ind} onChange={(e) => setInd(e.target.value)} placeholder="8,000" /></label>}
         </div>
         <label className="f">Descrição (opcional)<input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Ex.: carros nacionais, tração dianteira, turbo" /></label>

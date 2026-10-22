@@ -33,6 +33,7 @@ create table if not exists public.categorias (
   tipo text not null default 'tempo' check (tipo in ('tempo', 'caracteristica')),
   indice numeric(6,3),
   descricao text,
+  letra text,
   exemplo boolean not null default false
 );
 
@@ -107,7 +108,7 @@ create table if not exists public.puxadas (
   id uuid primary key default gen_random_uuid(),
   evento_id uuid not null references public.eventos (id) on delete cascade,
   categoria_id uuid references public.categorias (id) on delete restrict,
-  fase text not null check (fase in ('classificatoria', 'semi1', 'semi2', 'final', 'terceiro', 'copa')),
+  fase text not null check (fase in ('treino', 'classificatoria', 'semi1', 'semi2', 'final', 'terceiro', 'copa')),
   copa_key text,
   piloto_id uuid not null references public.pilotos (id) on delete restrict,
   carro_id uuid not null references public.carros (id) on delete restrict,
@@ -119,9 +120,11 @@ create table if not exists public.puxadas (
   valida boolean not null default true,
   motivo text,
   criado bigint not null default (extract(epoch from now()) * 1000)::bigint,
+  import_key text,
   exemplo boolean not null default false
 );
 create index if not exists puxadas_evento_idx on public.puxadas (evento_id);
+create unique index if not exists puxadas_import_key on public.puxadas (evento_id, import_key) where import_key is not null;
 
 -- ---------- regras do cadastro de piloto ----------
 -- Piloto não muda o próprio status nem o dono do cadastro.
