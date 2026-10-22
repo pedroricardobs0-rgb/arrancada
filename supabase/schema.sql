@@ -77,6 +77,8 @@ create table if not exists public.carros (
   numero text,
   configs text[] not null default '{}',
   tracao text check (tracao in ('dianteira', 'traseira', '4x4')),
+  combustivel text check (combustivel in ('alcool', 'gasolina', 'metanol')),
+  alimentacao text check (alimentacao in ('injetado', 'carburado')),
   foto_carro text,
   foto_piloto text,
   created_at timestamptz not null default now(),
@@ -223,8 +225,7 @@ create policy "fotos apaga" on storage.objects for delete to authenticated
 
 -- ---------- dados iniciais ----------
 insert into public.configuracoes (nome) values
-  ('Aspirado'), ('Turbo'), ('Biturbo'), ('Nitro'), ('Blower'), ('Injeção eletrônica'),
-  ('Carburado'), ('Etanol'), ('Gasolina'), ('Metanol')
+  ('Aspirado'), ('Turbo'), ('Biturbo'), ('Nitro'), ('Blower')
 on conflict do nothing;
 
 -- ---------- tornar-se admin ----------

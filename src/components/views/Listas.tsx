@@ -6,7 +6,7 @@ import { useApp } from '../App';
 import { Ava, Confirma, Empty, ExTag, Slip, StatusPill } from '../ui';
 import { FormCampeonato, FormCarro, FormEvento, FormPilotoAdmin, FormPuxada } from '../forms';
 import { byDateAsc, byDateDesc, byName, fdate, fotoUrl, ft, initials } from '@/lib/format';
-import { aprovados, melhorAno, pilName, rankingCamp, resultado, copaBracket, carPil, STATUS, TRACAO, validade, vals, yearOf } from '@/lib/regras';
+import { aprovados, melhorAno, pilName, rankingCamp, resultado, copaBracket, carPil, STATUS, TRACAO, COMBUSTIVEL, ALIMENTACAO, validade, vals, yearOf } from '@/lib/regras';
 import { apagarFoto, excluir } from '@/lib/db';
 import type { Carro, Evento } from '@/lib/types';
 
@@ -167,7 +167,7 @@ export function CarCard({ c }: { c: Carro }) {
       <div className="bd">
         <div className="row between"><h3>{c.modelo}{c.numero ? ' #' + c.numero : ''}</h3><ExTag o={c} /></div>
         <Link className="muted plain" style={{ fontSize: 14 }} href={'/pilotos/' + c.pilotoId}>{pilName(d, c.pilotoId)}{c.ano ? ' · ' + c.ano : ''}</Link>
-        <div className="tags"><span className="tag tr">Tração {c.tracao ? TRACAO[c.tracao] : '—'}</span>{c.configs.map((x) => <span key={x} className="tag">{x}</span>)}</div>
+        <div className="tags"><span className="tag tr">Tração {c.tracao ? TRACAO[c.tracao] : '—'}</span>{c.combustivel && <span className="tag tr">{COMBUSTIVEL[c.combustivel]}</span>}{c.alimentacao && <span className="tag tr">{ALIMENTACAO[c.alimentacao]}</span>}{c.configs.map((x) => <span key={x} className="tag">{x}</span>)}</div>
         <div className="best"><span className="muted" style={{ fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase' }}>Melhor 201 m em {ano}</span><span className="t">{b ? ft(b.m201) + ' s' : '—'}</span></div>
         {b && <span className="muted" style={{ fontSize: 12 }}>{d.ev[b.eventoId]?.nome} · R {ft(b.reacao)} · {ft(b.vel, 2)} km/h</span>}
         {pode && <div className="row">

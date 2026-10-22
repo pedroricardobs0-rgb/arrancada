@@ -8,6 +8,8 @@ export const FASE_CURTA: Record<string, string> = {
   classificatoria: 'Classif.', semi1: 'Semi 1', semi2: 'Semi 2', final: 'Final', terceiro: '3º lugar', copa: 'Copa',
 };
 export const TRACAO: Record<string, string> = { dianteira: 'Dianteira', traseira: 'Traseira', '4x4': '4x4' };
+export const COMBUSTIVEL: Record<string, string> = { alcool: 'Álcool', gasolina: 'Gasolina', metanol: 'Metanol' };
+export const ALIMENTACAO: Record<string, string> = { injetado: 'Injetado', carburado: 'Carburado' };
 export const STATUS: Record<string, string> = { agendado: 'Agendado', andamento: 'Em andamento', encerrado: 'Encerrado' };
 export const BYE = 'BYE';
 

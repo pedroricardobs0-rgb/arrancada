@@ -18,13 +18,13 @@ export async function carregarExemplo() {
   const nomes = [['Rafael Moura', 'Rafa'], ['Diego Santana', 'Dieguinho'], ['Bruna Albuquerque', 'Bru'], ['Tiago Ferraz', 'Ferrari'], ['Marcos Leal', 'Leal'], ['Fernanda Prado', 'Nanda']];
   const cidades = ['Campinas', 'Sorocaba', 'Curitiba', 'Jundiaí', 'Ribeirão Preto', 'Londrina'];
   const pil = nomes.map(([n, a], i) => ({ id: I('p' + i), nome: n, apelido: a, cidade: cidades[i], status: 'aprovado' }));
-  const carDef: [string, number, string, string, string[], string][] = [
-    ['c0', 0, 'VW Gol GTI', '11', ['Turbo', 'Etanol'], 'dianteira'], ['c1', 0, 'Opala SS', '12', ['Aspirado', 'Nitro'], 'traseira'],
-    ['c2', 1, 'Honda Civic Si', '27', ['Turbo'], 'dianteira'], ['c3', 2, 'Mitsubishi Lancer Evo', '8', ['Turbo', 'Metanol'], '4x4'],
-    ['c4', 3, 'Chevette', '33', ['Turbo', 'Etanol'], 'traseira'], ['c5', 4, 'Fiat Uno Turbo', '5', ['Turbo', 'Gasolina'], 'dianteira'],
-    ['c6', 5, 'Ford Maverick V8', '70', ['Blower', 'Metanol'], 'traseira'],
+  const carDef: [string, number, string, string, string[], string, string, string][] = [
+    ['c0', 0, 'VW Gol GTI', '11', ['Turbo'], 'dianteira', 'alcool', 'injetado'], ['c1', 0, 'Opala SS', '12', ['Aspirado', 'Nitro'], 'traseira', 'gasolina', 'carburado'],
+    ['c2', 1, 'Honda Civic Si', '27', ['Turbo'], 'dianteira', 'gasolina', 'injetado'], ['c3', 2, 'Mitsubishi Lancer Evo', '8', ['Turbo'], '4x4', 'metanol', 'injetado'],
+    ['c4', 3, 'Chevette', '33', ['Turbo'], 'traseira', 'alcool', 'carburado'], ['c5', 4, 'Fiat Uno Turbo', '5', ['Turbo'], 'dianteira', 'gasolina', 'injetado'],
+    ['c6', 5, 'Ford Maverick V8', '70', ['Blower'], 'traseira', 'metanol', 'carburado'],
   ];
-  const car = carDef.map(([k, p, m, n, cf, tr]) => ({ id: I(k), pilotoId: I('p' + p), modelo: m, numero: n, configs: cf, tracao: tr }));
+  const car = carDef.map(([k, p, m, n, cf, tr, cb, al]) => ({ id: I(k), pilotoId: I('p' + p), modelo: m, numero: n, configs: cf, tracao: tr, combustivel: cb, alimentacao: al }));
   const carPil = (ci: number) => car[ci].pilotoId;
   const ev = [
     { id: I('e1'), nome: '1ª Etapa', campeonatoId: I('camp'), data: `${ano}-03-15`, local: 'Pista exemplo', status: 'encerrado', categorias: [I('street8'), I('dt')], pontuacao: [], encerradoAntecipado: false, vencedores: {},

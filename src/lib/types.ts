@@ -1,4 +1,6 @@
 export type Tracao = 'dianteira' | 'traseira' | '4x4';
+export type Combustivel = 'alcool' | 'gasolina' | 'metanol';
+export type Alimentacao = 'injetado' | 'carburado';
 export type StatusEvento = 'agendado' | 'andamento' | 'encerrado';
 export type StatusPiloto = 'pendente' | 'aprovado' | 'recusado';
 export type Fase = 'classificatoria' | 'semi1' | 'semi2' | 'final' | 'terceiro' | 'copa';
@@ -12,7 +14,7 @@ export type Piloto = {
 export type Contato = { pilotoId: string; email: string | null; telefone: string | null };
 export type Carro = {
   id: string; pilotoId: string; modelo: string; ano: string | null; numero: string | null; configs: string[];
-  tracao: Tracao | null; fotoCarro: string | null; fotoPiloto: string | null; exemplo?: boolean;
+  tracao: Tracao | null; combustivel: Combustivel | null; alimentacao: Alimentacao | null; fotoCarro: string | null; fotoPiloto: string | null; exemplo?: boolean;
 };
 export type CopaMatchDef = { a: string; b: string };
 export type Copa = { r1: CopaMatchDef[]; vencedores: Record<string, string | null> };

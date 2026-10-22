@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useApp } from './App';
 import { FotoCampo, MForm, Modal } from './ui';
 import { byDateDesc, byName, ft, num } from '@/lib/format';
-import { aprovados, BYE, carLabel, carName, carPil, copaBracket, copaRuns, DEFAULT_PTS, FASES, roundLabel, STATUS, TRACAO, tot, validade, vals } from '@/lib/regras';
+import { ALIMENTACAO, aprovados, BYE, COMBUSTIVEL, carLabel, carName, carPil, copaBracket, copaRuns, DEFAULT_PTS, FASES, roundLabel, STATUS, TRACAO, tot, validade, vals } from '@/lib/regras';
 import { enviarFoto, salvar } from '@/lib/db';
-import type { Campeonato, Carro, Categoria, Evento, Fase, Piloto, Puxada, Tracao } from '@/lib/types';
+import type { Alimentacao, Campeonato, Carro, Categoria, Combustivel, Evento, Fase, Piloto, Puxada, Tracao } from '@/lib/types';
 
 const novoId = () => crypto.randomUUID();
 const listaPts = (s: string) => s.split(/[,;\s]+/).filter(Boolean).map(Number).filter((n) => isFinite(n));
@@ -145,20 +145,24 @@ export function FormCarro({ c, pilotoFixo }: { c?: Carro; pilotoFixo?: string })
   const [f, setF] = useState({
     pilotoId: c?.pilotoId || pilotoFixo || pilotos[0]?.id || '', modelo: c?.modelo || '', ano: c?.ano || '', numero: c?.numero || '',
     configs: c?.configs || [], tracao: c?.tracao || ('' as Tracao | ''),
+    combustivel: c?.combustivel || ('' as Combustivel | ''), alimentacao: c?.alimentacao || ('' as Alimentacao | ''),
   });
   const [fc, setFc] = useState<File | null>(null);
   const [fp, setFp] = useState<File | null>(null);
   const set = (k: keyof typeof f, v: unknown) => setF({ ...f, [k]: v });
-  const opcoes = [...new Set([...d.configs, ...(c?.configs || [])])];
+  const antigos = ['Etanol', 'Álcool', 'Gasolina', 'Metanol', 'Injeção eletrônica', 'Injetado', 'Carburado'];
+  const opcoes = [...new Set([...d.configs, ...(c?.configs || [])])].filter((x) => !antigos.includes(x));
   return (
     <Modal title={c ? 'Editar carro' : 'Novo carro'}>
       <MForm onSubmit={async () => {
         if (!f.pilotoId) throw new Error('Escolha o piloto.');
         if (!f.modelo.trim()) throw new Error('Informe a marca/modelo do carro.');
         if (!f.tracao) throw new Error('Escolha o tipo de tração.');
+        if (!f.combustivel) throw new Error('Escolha o combustível.');
+        if (!f.alimentacao) throw new Error('Escolha se o carro é injetado ou carburado.');
         const fotoCarro = fc ? await enviarFoto(fc, s.userId!) : c?.fotoCarro ?? null;
         const fotoPiloto = fp ? await enviarFoto(fp, s.userId!) : c?.fotoPiloto ?? null;
-        await salvar('car', { id: c?.id || novoId(), pilotoId: f.pilotoId, modelo: f.modelo.trim(), ano: f.ano.trim() || null, numero: f.numero.trim() || null, configs: f.configs, tracao: f.tracao, fotoCarro, fotoPiloto });
+        await salvar('car', { id: c?.id || novoId(), pilotoId: f.pilotoId, modelo: f.modelo.trim(), ano: f.ano.trim() || null, numero: f.numero.trim() || null, configs: f.configs, tracao: f.tracao, combustivel: f.combustivel, alimentacao: f.alimentacao, fotoCarro, fotoPiloto });
       }}>
         {s.isAdmin && !pilotoFixo && (
           <label className="f">Piloto<select value={f.pilotoId} onChange={(e) => set('pilotoId', e.target.value)}>
@@ -172,6 +176,12 @@ export function FormCarro({ c, pilotoFixo }: { c?: Carro; pilotoFixo?: string })
         <fieldset><legend>Configuração (marque todas que se aplicam)</legend><div className="checks">
           {opcoes.map((x) => <label key={x}><input type="checkbox" checked={f.configs.includes(x)}
             onChange={(e) => set('configs', e.target.checked ? [...f.configs, x] : f.configs.filter((y) => y !== x))} />{x}</label>)}
+        </div></fieldset>
+        <fieldset><legend>Combustível</legend><div className="checks">
+          {Object.entries(COMBUSTIVEL).map(([k, l]) => <label key={k}><input type="radio" name="combustivel" checked={f.combustivel === k} onChange={() => set('combustivel', k)} />{l}</label>)}
+        </div></fieldset>
+        <fieldset><legend>Alimentação</legend><div className="checks">
+          {Object.entries(ALIMENTACAO).map(([k, l]) => <label key={k}><input type="radio" name="alimentacao" checked={f.alimentacao === k} onChange={() => set('alimentacao', k)} />{l}</label>)}
         </div></fieldset>
         <fieldset><legend>Tração</legend><div className="checks">
           {Object.entries(TRACAO).map(([k, l]) => <label key={k}><input type="radio" name="tracao" checked={f.tracao === k} onChange={() => set('tracao', k)} />{l}</label>)}
